@@ -8,7 +8,7 @@ env:
   CONTAINER_APP_NAME: accesscontrol-app-20250529134242
   CONTAINER_APP_RESOURCE_GROUP_NAME: softensity
   CONTAINER_REGISTRY_LOGIN_SERVER: accesscontrol20250529134837.azurecr.io
-  DOCKER_FILE_PATH: AccessControl/Dockerfile
+  DOCKER_FILE_PATH: "./Dockerfile" 
   PROJECT_NAME_FOR_DOCKER: accesscontrol
 jobs:
   build:
