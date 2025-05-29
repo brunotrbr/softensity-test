@@ -1,0 +1,48 @@
+name: Trigger auto deployment for accesscontrol-app-20250529134242
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/accesscontrol-app-20250529134242-AutoDeployTrigger-4b12d58d-a4d7-4195-9e32-4f9a58bbea33.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.ACCESSCONTROLAPP20250529134242_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.ACCESSCONTROLAPP20250529134242_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.ACCESSCONTROLAPP20250529134242_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          registryUrl: accesscontrol20250529134837.azurecr.io
+          registryUsername: ${{ secrets.ACCESSCONTROLAPP20250529134242_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.ACCESSCONTROLAPP20250529134242_REGISTRY_PASSWORD }}
+          containerAppName: accesscontrol-app-20250529134242
+          resourceGroup: softensity
+          imageToBuild: accesscontrol20250529134837.azurecr.io/accesscontrol-app-20250529134242:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
