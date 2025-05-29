@@ -240,7 +240,7 @@ I know it may be wrong turn all errors into 500 (depends on the stratefy of the 
 
 
 
-[contributors-shield]: https://img.shields.io/github/contributors/brunotrbr/maplr-sugar-shack?style=for-the-badge
-[contributors-url]: https://github.com/brunotrbr/maplr-sugar-shack/graphs/contributors
+[contributors-shield]: https://img.shields.io/github/contributors/brunotrbr/softensity-test?style=for-the-badge
+[contributors-url]: https://github.com/brunotrbr/softensity-test/graphs/contributors
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/brunotrbr/
