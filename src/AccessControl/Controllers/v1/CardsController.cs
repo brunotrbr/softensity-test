@@ -1,35 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
-using AccessControl.Domain.Models;
+using AccessControl.Domain.Interfaces.v1.UseCases;
 
 namespace AccessControl.Controllers.v1
 {
     [ApiController]
     [Route("api/v1/cards")]
-    public class CardsController : ControllerBase
+    public class CardsController(ICardsUseCase cardsUseCase) : ControllerBase
     {
-        private AccessControlService _cardsService;
+        private readonly ICardsUseCase _cardsUseCase = cardsUseCase  ?? throw new ArgumentNullException(nameof(cardsUseCase));
 
-        public CardsController(AccessControlService cardsService)
+        [HttpPost(Name = "Create Card")]
+        public async Task<string> Create([FromQuery] int cardNumber, [FromQuery] string firstName, [FromQuery] string lastName)
         {
-            _cardsService = cardsService;
+            return await _cardsUseCase.CreateCard(cardNumber, firstName, lastName);
         }
 
-        [HttpPost]
-        public string Create([FromQuery] int cardNumber, [FromQuery] string firstName, [FromQuery] string lastName)
+        [HttpPut(Name = "Grant Access")]
+        public async Task<string> GrantAccess([FromQuery] int cardNumber , [FromQuery] int doorNumber)
         {
-            return _cardsService.AddCard(cardNumber, firstName, lastName);
+            return await _cardsUseCase.GrantAccess(cardNumber, doorNumber);
         }
 
-        [HttpPut]
-        public string GrantAccess([FromQuery] int cardNumber , [FromQuery] int doorNumber)
+        [HttpDelete(Name = "Cancel Permission")]
+        public async Task<string> CancelPermission([FromQuery] string permissionId)
         {
-            return _cardsService.GrantAccess(cardNumber, doorNumber);
-        }
-
-        [HttpDelete]
-        public string CancelPermission([FromQuery] string permissionId)
-        {
-            throw new NotImplementedException();
+            return await _cardsUseCase.CancelPermission(permissionId);
         }
     }
 }
