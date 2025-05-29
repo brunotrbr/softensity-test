@@ -13,13 +13,13 @@ WORKDIR /src
 
 COPY . ./
 
-WORKDIR "/src/."
-RUN ls
-RUN dotnet restore "AccessControl/AccessControl.csproj"
-RUN dotnet build "AccessControl/AccessControl.csproj" -c Release -o /app/build
+WORKDIR "/src/AccessControl"
+
+RUN dotnet restore "AccessControl.csproj"
+RUN dotnet build "AccessControl.csproj" -c Release -o /app/build
 
 FROM build-api AS publish
-RUN dotnet publish "AccessControl/AccessControl.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "AccessControl.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
