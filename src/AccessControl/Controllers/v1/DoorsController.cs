@@ -1,29 +1,25 @@
-using Microsoft.AspNetCore.Mvc;
+using AccessControl.Domain.Interfaces.v1.UseCases;
 using AccessControl.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AccessControl.Controllers.v1
 {
     [ApiController]
     [Route("api/v1/doors")]
-    public class DoorsController : ControllerBase
+    public class DoorsController(IDoorsUseCase doorsUseCase) : ControllerBase
     {
-        private AccessControlService _doorsService;
-
-        public DoorsController(AccessControlService doorsService)
-        {
-            _doorsService = doorsService;
-        }
+        private readonly IDoorsUseCase _doorsUseCase = doorsUseCase ?? throw new ArgumentNullException(nameof(doorsUseCase));
 
         [HttpPost(Name = "Create Door")]
-        public Door Create([FromQuery] int doorNumber, [FromQuery] int doorType, [FromQuery] string doorName)
+        public async Task<Door> Create([FromQuery] int doorNumber, [FromQuery] int doorType, [FromQuery] string doorName)
         {
-            return _doorsService.AddDoor(doorNumber, doorType, doorName);
+            return await _doorsUseCase.CreateDoor(doorNumber, doorType, doorName);
         }
 
         [HttpDelete(Name = "Remove Door")]
-        public string Remove([FromQuery] int doorNumber)
+        public async Task<string> Remove([FromQuery] int doorNumber)
         {
-            throw new NotImplementedException();
+            return await _doorsUseCase.RemoveDoor(doorNumber);
         }
     }
 }

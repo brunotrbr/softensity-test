@@ -1,9 +1,18 @@
-using AccessControl;
-using Microsoft.AspNetCore.Builder;
+using AccessControl.Application.UseCases.v1;
+using AccessControl.Domain.Interfaces.v1.Repository;
+using AccessControl.Domain.Interfaces.v1.UseCases;
+using AccessControl.ExceptionHandlers;
+using AccessControl.Infrastructure;
+using AccessControl.Infrastructure.Repository.v1;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<AccessControlService>();
+// Adding context
+builder.Services.AddDbContext<DBContext>();
+
+// Adding exception handling
+builder.Services.AddExceptionHandler<GeneralExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddControllers();
 
@@ -14,8 +23,17 @@ builder.Services.AddSwaggerGen(config =>
     config.SwaggerDoc("v1", new() { Title = "Access Control API", Version = "v1" });
 });
 
+// Adding Use Cases
+builder.Services.AddScoped<ICardsUseCase, CardsUseCase>();
+builder.Services.AddScoped<IDoorsUseCase, DoorsUseCase>();
+
+// Adding Repositories
+builder.Services.AddScoped<ICardsRepository, CardsRepository>();
+builder.Services.AddScoped<IDoorsRepository, DoorsRepository>();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Enabling swagger only for development
 if (app.Environment.IsDevelopment())
