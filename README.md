@@ -222,7 +222,7 @@ I know it may be wrong turn all errors into 500 (depends on the stratefy of the 
         - Added method to list cards and doors (just to check how things are going)
 
     step-7
-    - Added deploy to Azure, but it's not working.
+    - Added deploy to Azure, but it's not working
 
     step-8
     - Removed docker build to github actions added in step-5
@@ -230,7 +230,8 @@ I know it may be wrong turn all errors into 500 (depends on the stratefy of the 
 
     step-9
     - Added readme
-    - Removed UseDeveloperExceptionPage to GeneralExceptionHandler works properly in development environment.
+    - Removed UseDeveloperExceptionPage to GeneralExceptionHandler works properly in development environment
+    - Added net-main.zip to root directory
 
 ### Acknowledgements
 
