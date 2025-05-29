@@ -12,9 +12,9 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-api
 WORKDIR /src 
 
 COPY . ./
-RUN dotnet restore "AccessControl/AccessControl.csproj"
 
 WORKDIR "/src/."
+RUN dotnet restore "AccessControl/AccessControl.csproj"
 RUN dotnet build "AccessControl/AccessControl.csproj" -c Release -o /app/build
 
 FROM build-api AS publish
