@@ -1,5 +1,6 @@
 ﻿using AccessControl.Domain.Interfaces.v1.Repository;
 using AccessControl.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace AccessControl.Infrastructure.Repository.v1
 {
@@ -7,10 +8,22 @@ namespace AccessControl.Infrastructure.Repository.v1
     {
         private readonly DBContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
+        private static string GenerateCardId(int cardNumber)
+        {
+            return $"Card{cardNumber}";
+        }
+
         public Task<string> AddCard(int cardNumber, string firstName, string lastName)
         {
             using (_context)
             {
+                var cardId = GenerateCardId(cardNumber);
+
+                if (_context.Cards.Any(c => c.Id == cardId))
+                {
+                    throw new InvalidOperationException($"Card with number {cardNumber} already exists.");
+                }
+
                 Card c = new Card()
                 {
                     Id = $"Card{cardNumber}",
@@ -21,8 +34,8 @@ namespace AccessControl.Infrastructure.Repository.v1
                     ValidTo = DateTime.Now + new TimeSpan(365, 0, 0, 0)
                 };
 
-                _context.Cards.AddAsync(c);
-                _context.SaveChangesAsync();
+                _context.Cards.Add(c);
+                _context.SaveChanges();
 
                 return Task.FromResult(c.Id);
             }
@@ -30,25 +43,79 @@ namespace AccessControl.Infrastructure.Repository.v1
 
         public Task<string> GrantAccess(int cardNumber, int doorNumber)
         {
-            try
+            var cardId = GenerateCardId(cardNumber);
+            using (_context)
             {
-                using (_context)
+                var card = _context.Cards.Where(c => c.Id == cardId).FirstOrDefault();
+                if (card is null)
                 {
-                    _context.Cards.Where(c => c.Number == cardNumber).First().DoorsNumbersWithAccess.Add(doorNumber);
-                    _context.SaveChangesAsync();
+                    throw new InvalidOperationException($"Card with number {cardNumber} does not exist.");
                 }
-            }
-            catch (Exception ex)
-            {
-                return Task.FromResult("Failure");
+
+                var door = _context.Doors.Where(d => d.Number == doorNumber).FirstOrDefault();
+                if (door is null)
+                {
+                    throw new InvalidOperationException($"Door with number {doorNumber} does not exist.");
+                }
+
+                if (card.DoorsNumbersWithAccess.Any(d => d == doorNumber))
+                {
+                    throw new InvalidOperationException($"Card with number {cardNumber} already has access to door {doorNumber}.");
+                }
+
+                if (door.DoorsIdsWithAccess.Any(c => c == cardId))
+                {
+                    throw new InvalidOperationException($"Card with number {cardNumber} already has access to door {doorNumber}.");
+                }
+
+                card.DoorsNumbersWithAccess.Add(doorNumber);
+                door.DoorsIdsWithAccess.Add(cardId);
+
+                _context.SaveChanges();
             }
 
-            return Task.FromResult("Success");
+            return Task.FromResult("Granted");
         }
 
-        public Task<string> CancelPermission(string permissionId)
+        public Task<string> CancelPermission(int cardNumber, int doorNumber)
         {
-            throw new NotImplementedException();
+            var cardId = GenerateCardId(cardNumber);
+
+            using (_context)
+            {
+                var card = _context.Cards.Where(c => c.Id == cardId).FirstOrDefault();
+                if (card is null)
+                {
+                    throw new InvalidOperationException($"Card with number {cardNumber} does not exist.");
+                }
+
+                var door = _context.Doors.Where(d => d.Number == doorNumber).FirstOrDefault();
+                if (door is null)
+                {
+                    throw new InvalidOperationException($"Door with number {doorNumber} does not exist.");
+                }
+
+                if (!card.DoorsNumbersWithAccess.Any(d => d == doorNumber))
+                {
+                    throw new InvalidOperationException($"Card with number {cardNumber} does not have access to door {doorNumber}.");
+                }
+
+                if (!door.DoorsIdsWithAccess.Any(c => c == cardId))
+                {
+                    throw new InvalidOperationException($"Card with number {cardNumber} does not have access to door {doorNumber}.");
+                }
+
+                card.DoorsNumbersWithAccess.Remove(doorNumber);
+                door.DoorsIdsWithAccess.Remove(cardId);
+                _context.SaveChanges();
+            }
+
+            return Task.FromResult("Permission canceled");
+        }
+
+        public Task<IQueryable<Card>> ListCards()
+        {
+            return Task.FromResult(_context.Cards.AsQueryable());
         }
     }
 }

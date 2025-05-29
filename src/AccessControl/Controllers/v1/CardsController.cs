@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
 using AccessControl.Domain.Interfaces.v1.UseCases;
+using AccessControl.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AccessControl.Controllers.v1
 {
@@ -7,24 +8,35 @@ namespace AccessControl.Controllers.v1
     [Route("api/v1/cards")]
     public class CardsController(ICardsUseCase cardsUseCase) : ControllerBase
     {
-        private readonly ICardsUseCase _cardsUseCase = cardsUseCase  ?? throw new ArgumentNullException(nameof(cardsUseCase));
+        private readonly ICardsUseCase _cardsUseCase = cardsUseCase ?? throw new ArgumentNullException(nameof(cardsUseCase));
 
         [HttpPost(Name = "Create Card")]
-        public async Task<string> Create([FromQuery] int cardNumber, [FromQuery] string firstName, [FromQuery] string lastName)
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Door))]
+        public async Task<ActionResult<string>> Create([FromQuery] int cardNumber, [FromQuery] string firstName, [FromQuery] string lastName)
         {
-            return await _cardsUseCase.CreateCard(cardNumber, firstName, lastName);
+            return new ObjectResult(await _cardsUseCase.CreateCard(cardNumber, firstName, lastName)) { StatusCode = StatusCodes.Status201Created };
         }
 
         [HttpPut(Name = "Grant Access")]
-        public async Task<string> GrantAccess([FromQuery] int cardNumber , [FromQuery] int doorNumber)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        public async Task<ActionResult<string>> GrantAccess([FromQuery] int cardNumber, [FromQuery] int doorNumber)
         {
-            return await _cardsUseCase.GrantAccess(cardNumber, doorNumber);
+            return Ok(await _cardsUseCase.GrantAccess(cardNumber, doorNumber));
         }
 
         [HttpDelete(Name = "Cancel Permission")]
-        public async Task<string> CancelPermission([FromQuery] string permissionId)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        public async Task<string> CancelPermission([FromQuery] int cardNumber, [FromQuery] int doorNumber)
         {
-            return await _cardsUseCase.CancelPermission(permissionId);
+            return await _cardsUseCase.CancelPermission(cardNumber, doorNumber);
+        }
+
+        [HttpGet(Name = "List cards")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Card>))]
+        public async Task<ActionResult<List<Card>>> Get()
+        {
+            return Ok(await _cardsUseCase.ListCards());
         }
     }
 }

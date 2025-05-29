@@ -1,5 +1,6 @@
 ﻿using AccessControl.Domain.Interfaces.v1.Repository;
 using AccessControl.Domain.Interfaces.v1.UseCases;
+using AccessControl.Domain.Models;
 
 namespace AccessControl.Application.UseCases.v1
 {
@@ -17,9 +18,14 @@ namespace AccessControl.Application.UseCases.v1
             return await _cardsRepository.GrantAccess(cardNumber, doorNumber);
         }
 
-        public async Task<string> CancelPermission(string permissionId)
+        public async Task<string> CancelPermission(int cardNumber, int doorNumber)
         {
-            return await _cardsRepository.CancelPermission(permissionId);
+            return await _cardsRepository.CancelPermission(cardNumber, doorNumber);
+        }
+
+        public async Task<IQueryable<Card>> ListCards()
+        {
+            return await _cardsRepository.ListCards();
         }
     }
 }
