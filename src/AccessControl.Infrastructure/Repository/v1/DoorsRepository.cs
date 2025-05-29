@@ -1,12 +1,14 @@
 ﻿using AccessControl.Domain.Enums;
 using AccessControl.Domain.Interfaces.v1.Repository;
 using AccessControl.Domain.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AccessControl.Infrastructure.Repository.v1
 {
-    public class DoorsRepository(DBContext context) : IDoorsRepository
+    public class DoorsRepository(DBContext context, ILogger<DoorsRepository> logger) : IDoorsRepository
     {
         private readonly DBContext _context = context ?? throw new ArgumentNullException(nameof(context));
+        private readonly ILogger<DoorsRepository> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         private static string GenerateDoorId(int doorNumber, DoorTypeEnum doorType)
         {
@@ -14,6 +16,7 @@ namespace AccessControl.Infrastructure.Repository.v1
         }
         public Task<Door> AddDoor(int doorNumber, DoorTypeEnum doorType, string doorName)
         {
+            _logger.LogInformation(nameof(AddDoor));
             using (_context)
             {
                 if (_context.Doors.Any(d => d.Number == doorNumber))
@@ -39,6 +42,7 @@ namespace AccessControl.Infrastructure.Repository.v1
 
         public Task<string> RemoveDoor(int doorNumber)
         {
+            _logger.LogInformation(nameof(RemoveDoor));
             return Task.Run(() =>
             {
                 if (!_context.Doors.Any(d => d.Number == doorNumber))
@@ -62,6 +66,7 @@ namespace AccessControl.Infrastructure.Repository.v1
 
         public Task<IQueryable<Door>> ListDoors()
         {
+            _logger.LogInformation(nameof(ListDoors));
             return Task.FromResult(_context.Doors.AsQueryable());
         }
     }

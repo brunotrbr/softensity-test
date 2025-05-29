@@ -1,12 +1,14 @@
 ﻿using AccessControl.Domain.Interfaces.v1.Repository;
 using AccessControl.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace AccessControl.Infrastructure.Repository.v1
 {
-    public class CardsRepository(DBContext context) : ICardsRepository
+    public class CardsRepository(DBContext context, ILogger<CardsRepository> logger) : ICardsRepository
     {
         private readonly DBContext _context = context ?? throw new ArgumentNullException(nameof(context));
+        private readonly ILogger<CardsRepository> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         private static string GenerateCardId(int cardNumber)
         {
@@ -15,6 +17,7 @@ namespace AccessControl.Infrastructure.Repository.v1
 
         public Task<string> AddCard(int cardNumber, string firstName, string lastName)
         {
+            _logger.LogInformation(nameof(AddCard));
             using (_context)
             {
                 var cardId = GenerateCardId(cardNumber);
@@ -43,6 +46,7 @@ namespace AccessControl.Infrastructure.Repository.v1
 
         public Task<string> GrantAccess(int cardNumber, int doorNumber)
         {
+            _logger.LogInformation(nameof(GrantAccess));
             var cardId = GenerateCardId(cardNumber);
             using (_context)
             {
@@ -79,6 +83,7 @@ namespace AccessControl.Infrastructure.Repository.v1
 
         public Task<string> CancelPermission(int cardNumber, int doorNumber)
         {
+            _logger.LogInformation(nameof(CancelPermission));
             var cardId = GenerateCardId(cardNumber);
 
             using (_context)
@@ -115,6 +120,7 @@ namespace AccessControl.Infrastructure.Repository.v1
 
         public Task<IQueryable<Card>> ListCards()
         {
+            _logger.LogInformation(nameof(ListCards));
             return Task.FromResult(_context.Cards.AsQueryable());
         }
     }
