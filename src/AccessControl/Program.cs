@@ -52,7 +52,6 @@ try
     // Enabling swagger only for development
     if (app.Environment.IsDevelopment())
     {
-        app.UseDeveloperExceptionPage();
         app.UseSwagger();
         app.UseSwaggerUI(options =>
         {
