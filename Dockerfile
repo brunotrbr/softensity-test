@@ -9,16 +9,14 @@ RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /
 USER appuser
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-api
-WORKDIR /src 
 
 COPY . ./
 
-WORKDIR "/src/."
-RUN dotnet restore "AccessControl/AccessControl.csproj"
-RUN dotnet build "AccessControl/AccessControl.csproj" -c Release -o /app/build
+RUN dotnet restore "src/AccessControl/AccessControl.csproj"
+RUN dotnet build "src/AccessControl/AccessControl.csproj" -c Release -o /app/build
 
 FROM build-api AS publish
-RUN dotnet publish "AccessControl/AccessControl.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src/AccessControl/AccessControl.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
