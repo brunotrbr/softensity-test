@@ -14,7 +14,7 @@ WORKDIR /src
 COPY . ./
 
 WORKDIR "/src/AccessControl"
-
+RUN ls
 RUN dotnet restore "AccessControl.csproj"
 RUN dotnet build "AccessControl.csproj" -c Release -o /app/build
 
