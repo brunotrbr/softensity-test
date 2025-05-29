@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  AccessControl-api:
+    image: accesscontrol-api:latest
+    ports:
+      - 5140:5140
+    build:
+      context: .
+      target: final
