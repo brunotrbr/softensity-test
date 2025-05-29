@@ -1,10 +1,6 @@
-﻿using AccessControl.Domain.Interfaces.v1.Repository;
+﻿using AccessControl.Domain.Enums;
+using AccessControl.Domain.Interfaces.v1.Repository;
 using AccessControl.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AccessControl.Infrastructure.Repository.v1
 {
@@ -12,37 +8,61 @@ namespace AccessControl.Infrastructure.Repository.v1
     {
         private readonly DBContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
-        public Task<Door> AddDoor(int doorNumber, int doorType, string doorName)
+        private static string GenerateDoorId(int doorNumber, DoorTypeEnum doorType)
+        {
+            return "D" + doorNumber + "T" + (int)doorType;
+        }
+        public Task<Door> AddDoor(int doorNumber, DoorTypeEnum doorType, string doorName)
         {
             using (_context)
             {
-                Door d = new Door() { Id = "D" + doorNumber + "T" + doorType, Number = doorNumber, Name = doorName, CreatedAt = DateTime.Now };
-                // turn into enum
-                if (doorType == 0)
+                if (_context.Doors.Any(d => d.Number == doorNumber))
                 {
-                    d.Description = "Regular door";
+                    throw new InvalidOperationException($"Door with number {doorNumber} already exists.");
                 }
-                else if (doorType == 1)
-                {
-                    d.Description = "Tripod";
-                }
-                else if (doorType == 2)
-                {
-                    d.Description = "Elevator";
-                }
-                if (doorNumber < 0 || doorNumber > 100)
-                {
-                    throw new Exception("Incorrect door number");
-                }
+
+                var doorId = GenerateDoorId(doorNumber, doorType);
+                var doorDescription = doorType.GetDescription();
+
+                Door d = new Door() { 
+                    Id = doorId, 
+                    Number = doorNumber,
+                    Description = doorDescription,
+                    Name = doorName, 
+                    CreatedAt = DateTime.Now };
+
                 _context.Doors.Add(d);
-                _context.SaveChangesAsync();
+                _context.SaveChanges();
                 return Task.FromResult(d);
             }
         }
 
         public Task<string> RemoveDoor(int doorNumber)
         {
-            throw new NotImplementedException();
+            return Task.Run(() =>
+            {
+                if (!_context.Doors.Any(d => d.Number == doorNumber))
+                {
+                    throw new InvalidOperationException($"Door with number {doorNumber} does not exists.");
+                }
+
+                if(_context.Cards.Any(c => c.DoorsNumbersWithAccess.Contains(doorNumber)))
+                {
+                    throw new InvalidOperationException($"Door with number {doorNumber} cannot be removed because it is associated with one or more cards.");
+                }
+
+                var entity = _context.Doors.First(d => d.Number.Equals(doorNumber));
+
+                _context.Remove(entity);
+                _context.SaveChanges();
+
+                return doorNumber.ToString();
+            });
+        }
+
+        public Task<IQueryable<Door>> ListDoors()
+        {
+            return Task.FromResult(_context.Doors.AsQueryable());
         }
     }
 }
