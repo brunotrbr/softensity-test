@@ -10,4 +10,8 @@
     <ProjectReference Include="..\AccessControl.Domain\AccessControl.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+  </ItemGroup>
+
 </Project>
